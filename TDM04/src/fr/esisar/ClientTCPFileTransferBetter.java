@@ -11,19 +11,19 @@ import java.net.Socket;
 
 //Wait for connect to server, fetch packages, put them together
 
-public class ClientTCPFileTransfer
+public class ClientTCPFileTransferBetter
 {
 
     public static void main(String[] args) throws Exception
     {
-    	ClientTCPFileTransfer clientTCP = new ClientTCPFileTransfer();
+    	ClientTCPFileTransferBetter clientTCP = new ClientTCPFileTransferBetter();
         clientTCP.execute();                
     }
 
     private void execute() throws IOException
     {
     	// Output and input files
-        //File inputPath = new File(System.getProperty("user.home"),"Documents/test.txt");
+        File inputPath = new File(System.getProperty("user.home"),"Documents/test.txt");
         File outputPath = new File(System.getProperty("user.home"),"Documents/testR2.txt");
         Integer bufSize = 10_000;
         int port = 4251;
@@ -37,24 +37,38 @@ public class ClientTCPFileTransfer
         InetSocketAddress adrDest = new InetSocketAddress("127.0.0.1", port);
         socket.connect(adrDest);        
 
-//        // Sending the path we want
-//        byte[] bufE = inputPath.getAbsolutePath().getBytes();
-//        OutputStream os = socket.getOutputStream();
-//        os.write(bufE);
-//        System.out.println("Requested to copy \"" + inputPath + "\"");
+        // Sending the path we want
+        byte[] bufE = inputPath.getAbsolutePath().getBytes();
+        OutputStream os = socket.getOutputStream();
+        os.write(bufE);
+        System.out.println("Requested to copy \"" + inputPath + "\"");
 
-        // Wait for the server to send in the data
+        // Wait for the size of the file
         byte[] bufR = new byte[bufSize];
         InputStream is = socket.getInputStream();
         int lenBufR = is.read(bufR);
         
+        // Decode size
+        String sizeStr = new String(bufR).substring(0, lenBufR);
+        String sizeSubStr = sizeStr.substring(sizeStr.indexOf("size:") + 5, sizeStr.indexOf(";"));
+        Long sizeLong = Long.parseLong(sizeSubStr);
+        
         FileOutputStream fos = new FileOutputStream(outputPath);
 
-    	System.out.println("Receiving a file through TCP ...");
+    	System.out.println("Receiving \"" + inputPath + "\" through TCP ...");
+    	
+    	Long dataTransfered = (long) 0;
+    	Float percent = (float) 0.0;
+    	
+    	// Begin reading actual file
+    	lenBufR = is.read(bufR);
         if (lenBufR!=-1)
         {
-        	
+        	dataTransfered += lenBufR;
             fos.write(bufR,0,lenBufR);
+            
+            percent = 100 * ((float) dataTransfered)/sizeLong;
+            System.out.println(String.format("%.02f", percent) + "% Done...");
         }
         
         System.out.println("End of transfer.");

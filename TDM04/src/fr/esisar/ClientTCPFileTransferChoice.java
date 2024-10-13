@@ -11,19 +11,19 @@ import java.net.Socket;
 
 //Wait for connect to server, fetch packages, put them together
 
-public class ClientTCPFileTransfer
+public class ClientTCPFileTransferChoice
 {
 
     public static void main(String[] args) throws Exception
     {
-    	ClientTCPFileTransfer clientTCP = new ClientTCPFileTransfer();
+    	ClientTCPFileTransferChoice clientTCP = new ClientTCPFileTransferChoice();
         clientTCP.execute();                
     }
 
     private void execute() throws IOException
     {
     	// Output and input files
-        //File inputPath = new File(System.getProperty("user.home"),"Documents/test.txt");
+        File inputPath = new File(System.getProperty("user.home"),"Documents/test.txt");
         File outputPath = new File(System.getProperty("user.home"),"Documents/testR2.txt");
         Integer bufSize = 10_000;
         int port = 4251;
@@ -37,11 +37,11 @@ public class ClientTCPFileTransfer
         InetSocketAddress adrDest = new InetSocketAddress("127.0.0.1", port);
         socket.connect(adrDest);        
 
-//        // Sending the path we want
-//        byte[] bufE = inputPath.getAbsolutePath().getBytes();
-//        OutputStream os = socket.getOutputStream();
-//        os.write(bufE);
-//        System.out.println("Requested to copy \"" + inputPath + "\"");
+        // Sending the path we want
+        byte[] bufE = inputPath.getAbsolutePath().getBytes();
+        OutputStream os = socket.getOutputStream();
+        os.write(bufE);
+        System.out.println("Requested to copy \"" + inputPath + "\"");
 
         // Wait for the server to send in the data
         byte[] bufR = new byte[bufSize];
@@ -50,10 +50,9 @@ public class ClientTCPFileTransfer
         
         FileOutputStream fos = new FileOutputStream(outputPath);
 
-    	System.out.println("Receiving a file through TCP ...");
+    	System.out.println("Receiving \"" + inputPath + "\" through TCP ...");
         if (lenBufR!=-1)
         {
-        	
             fos.write(bufR,0,lenBufR);
         }
         
